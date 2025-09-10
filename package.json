@@ -1,0 +1,24 @@
+{
+    "name": "igc-to-fit",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "build": "npx tsc",
+        "run": "node index.js -h",
+        "run-test1": "node index.js -s test/input1.igc -d test/output1.fit",
+        "run-test2": "node index.js -s test/input2.igc -d test/output2.fit"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@garmin/fitsdk": "^21.178.0",
+        "commander": "^14.0.0",
+        "figlet": "^1.9.1",
+        "igc-parser": "^2.0.0"
+    },
+    "type": "module",
+    "devDependencies": {
+    }
+}
