@@ -4,16 +4,21 @@ import {program} from 'commander'
 import figlet from 'figlet'
 import IGCParser from 'igc-parser';
 import * as fs from 'node:fs';
+import path from 'node:path';
 import {Encoder, Profile} from '@garmin/fitsdk';
 
-console.log(figlet.textSync("IGC 2 FIT"))
+console.log(figlet.textSync("IGC 2 FIT"));
 program
     .version("1.0.0")
     .description("CLI for converting igc file to fit")
     .option("-s, --src <value>", "Source *.igc file")
     .option("-d, --dst <value>", "Destination *.fit file")
-    .parse(process.argv)
+    .parse(process.argv);
 
+// Display help if no arguments are provided
+if (!process.argv.slice(2).length) {
+    program.help();
+}
 
 /**
  * Converts IGC data to FIT format and saves to file
@@ -114,21 +119,54 @@ function convertIgcToFit(igcData, outputPath) {
     }
 }
 
-const options = program.opts()
+/**
+ * Main function to process the IGC to FIT conversion
+ * Handles validation and conversion process
+ */
+function main() {
+    const options = program.opts();
 
-if (options.src && options.dst) {
-    if (fs.existsSync(options.src)) {
+    // Check if both src and dst options are provided
+    if (!options.src || !options.dst) {
+        console.error('Error: Both source (--src) and destination (--dst) are required');
+        program.help();
+        process.exit(1);
+    }
 
-        let igcData = IGCParser.parse(fs.readFileSync(options.src, 'utf8'));
+    // Validate source file exists and has .igc extension
+    if (!fs.existsSync(options.src)) {
+        console.error(`Error: Source file ${options.src} does not exist`);
+        process.exit(1);
+    }
 
+    if (!options.src.toLowerCase().endsWith('.igc')) {
+        console.warn('Warning: Source file does not have .igc extension. Make sure it is a valid IGC file.');
+    }
+
+    // Make sure destination directory exists
+    const dstDir = path.dirname(options.dst);
+    if (!fs.existsSync(dstDir)) {
+        console.log(`Creating output directory: ${dstDir}`);
+        fs.mkdirSync(dstDir, {recursive: true});
+    }
+
+    try {
+        // Parse IGC file
+        const igcContent = fs.readFileSync(options.src, 'utf8');
+        const igcData = IGCParser.parse(igcContent);
+
+        // Convert to FIT and save
         if (convertIgcToFit(igcData, options.dst)) {
             console.log(`Successfully converted ${options.src} to ${options.dst}`);
         } else {
             console.error(`Failed to convert ${options.src} to ${options.dst}`);
             process.exit(1);
         }
-    } else {
-        console.error(`Source file ${options.src} does not exist`);
+    } catch (error) {
+        console.error(`Error during conversion process: ${error.message}`);
         process.exit(1);
     }
 }
+
+// Execute the main function
+main();
