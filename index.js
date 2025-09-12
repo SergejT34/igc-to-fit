@@ -6,8 +6,11 @@ import IGCParser from 'igc-parser';
 import * as fs from 'node:fs';
 import path from 'node:path';
 import {Encoder, Profile} from '@garmin/fitsdk';
+import {scoringRules, solver} from 'igc-xc-score';
+import IGCAnalyzer from "./utils/igc-analyzer.js";
 
 console.log(figlet.textSync("IGC 2 FIT"));
+
 program
     .version("1.0.0")
     .description("CLI for converting igc file to fit")
@@ -19,7 +22,7 @@ program
 if (!process.argv.slice(2).length) {
     program.help();
 }
-
+const igcAnalyzer = new IGCAnalyzer();
 /**
  * Converts IGC data to FIT format and saves to file
  * @param {Object} igcData - Parsed IGC data
@@ -29,6 +32,22 @@ function convertIgcToFit(igcData, outputPath) {
     try {
         console.log(`Converting IGC data to FIT format...`);
 
+        // Get timezone from igcData.timezone
+        const timezone = igcData.timezone;
+        let tzOffsetSeconds = 0;
+
+        if (timezone) {
+            // Parse timezone value (assumed to be in hours)
+            tzOffsetSeconds = parseFloat(timezone) * 3600; // Convert hours to seconds
+            const sign = tzOffsetSeconds >= 0 ? '+' : '-';
+            const hours = Math.abs(Math.floor(parseFloat(timezone)));
+            const minutes = Math.abs(Math.floor((parseFloat(timezone) % 1) * 60));
+            console.log(`Adjusting timestamps to timezone UTC${sign}${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
+        } else {
+            console.log(`No timezone information found. Using UTC timestamps.`);
+        }
+
+        igcAnalyzer.compute(igcData.fixes);
         // Create a new FIT encoder
         const encoder = new Encoder();
 
@@ -37,9 +56,10 @@ function convertIgcToFit(igcData, outputPath) {
         // FIT timestamp offset in seconds: 631065600
         const FIT_TIMESTAMP_OFFSET = 631065600;
 
-        // Convert JavaScript timestamp (ms) to FIT timestamp (s)
+        // Convert JavaScript timestamp (ms) to FIT timestamp (s) with timezone adjustment
         const toFitTimestamp = (jsTimestamp) => {
-            return Math.floor(jsTimestamp / 1000) - FIT_TIMESTAMP_OFFSET;
+            // Add timezone offset (in seconds) to convert UTC to specified timezone
+            return Math.floor(jsTimestamp / 1000) - FIT_TIMESTAMP_OFFSET + tzOffsetSeconds;
         };
 
         // Get first and last timestamps from fixes
@@ -78,7 +98,7 @@ function convertIgcToFit(igcData, outputPath) {
             totalTimerTime: totalElapsedTime,
             sport: "flying",
             subSport: "flyParaglide",
-            totalDistance: igcData.distance || 0,
+            totalDistance: igcData.fixes[igcData.fixes.length - 1].distance || 0,
             firstLapIndex: 0,
             numLaps: 1,
         };
@@ -89,7 +109,7 @@ function convertIgcToFit(igcData, outputPath) {
             timestamp: toFitTimestamp(lastFixTime),
             startTime: toFitTimestamp(firstFixTime),
             totalElapsedTime: totalElapsedTime,
-            totalDistance: igcData.distance || 0,
+            totalDistance: igcData.fixes[igcData.fixes.length - 1].distance || 0,
         };
         encoder.onMesg(Profile.MesgNum.LAP, lapMesg);
 
@@ -101,6 +121,9 @@ function convertIgcToFit(igcData, outputPath) {
                 positionLat: Math.round(fix.latitude * (Math.pow(2, 31) / 180)), // Convert to semicircles
                 positionLong: Math.round(fix.longitude * (Math.pow(2, 31) / 180)), // Convert to semicircles
                 altitude: fix.gpsAltitude || 0,
+                speed: fix.hspeed,
+                verticalSpeed: fix.vspeed,
+                distance: fix.distance
             };
             encoder.onMesg(Profile.MesgNum.RECORD, recordMesg);
         }
@@ -151,12 +174,36 @@ function main() {
     }
 
     try {
+        const rule = scoringRules['XContest'];
+
         // Parse IGC file
         const igcContent = fs.readFileSync(options.src, 'utf8');
-        const igcData = IGCParser.parse(igcContent);
+        const igcData = IGCParser.parse(igcContent, {lenient: true});
+
+
+        const solverObj = solver(igcData, rule, {
+            noflight: true,
+            invalid: true,
+            hp: true,
+            trim: false,
+            detectLaunch: true,
+            detectLanding: true
+        });
+
+        const result = solverObj.next().value;
+        if (!result.optimal) {
+            console.error(`Failed to convert ${options.src} to ${options.dst}`);
+            process.exit(1);
+        }
+
+        // Ensure timezone is passed from the original IGC data to the flight data
+        if (igcData.timezone) {
+            result.opt.flight.timezone = igcData.timezone;
+            console.log(`Found timezone in IGC file: UTC${igcData.timezone >= 0 ? '+' : ''}${igcData.timezone}`);
+        }
 
         // Convert to FIT and save
-        if (convertIgcToFit(igcData, options.dst)) {
+        if (convertIgcToFit(result.opt.flight, options.dst)) {
             console.log(`Successfully converted ${options.src} to ${options.dst}`);
         } else {
             console.error(`Failed to convert ${options.src} to ${options.dst}`);

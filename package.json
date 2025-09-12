@@ -13,9 +13,10 @@
         "run-test2": "node index.js -s test/input2.igc -d test/output2.fit"
     },
     "dependencies": {
+        "@garmin/fitsdk": "^21.178.0",
         "commander": "^14.0.0",
         "figlet": "^1.9.1",
-        "@garmin/fitsdk": "^21.178.0",
-        "igc-parser": "^2.0.0"
+        "igc-parser": "^2.0.0",
+        "igc-xc-score": "^1.8.0"
     }
 }
