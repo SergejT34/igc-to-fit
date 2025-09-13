@@ -20,16 +20,19 @@ with the DJI Osmo 360 camera.
     - Parses IGC with `igc-parser` (lenient by default).
     - Runs `igc-xc-score` solver (rule XContest) and uses result as the normalized track.
     - Preserves timezone (if present in the IGC) and adjusts FIT timestamps accordingly.
-    - Optionally analyzes the flight with [utils/igc-analyzer.js](utils/igc-analyzer.js) (computed before encoding; not all metrics are currently
+    - Optionally analyzes the flight with [utils/igc-analyzer.js](utils/igc-analyzer.js) (computed before encoding; not
+      all metrics are currently
       written into FIT).
 - Output: FIT activity containing FILE_ID, ACTIVITY, SESSION, LAP, and per-fix RECORD messages.
 
 Notes:
 
-- Timestamps: FIT expects seconds since `1989-12-31T00:00:00Z` (offset `631065600` from Unix epoch). The CLI applies the IGC
+- Timestamps: FIT expects seconds since `1989-12-31T00:00:00Z` (offset `631065600` from Unix epoch). The CLI applies the
+  IGC
   timezone offset (in hours; supports fractional offsets) exactly once while encoding.
 - Coordinates: Written as FIT semicircles (`degrees × 2^31 / 180`).
-- Per-fix fields: `altitude` uses `gpsAltitude`, `speed` uses `hspeed`, `verticalSpeed` uses `vspeed`, and `distance` is propagated if
+- Per-fix fields: `altitude` uses `gpsAltitude`, `speed` uses `hspeed`, `verticalSpeed` uses `vspeed`, and `distance` is
+  propagated if
   present.
 
 ## Requirements
