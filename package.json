@@ -7,7 +7,6 @@
         "igc-to-fit": "./index.js"
     },
     "scripts": {
-        "build": "npx tsc",
         "run": "node index.js -h",
         "run-test1": "node index.js -s test/input1.igc -d test/output1.fit",
         "run-test2": "node index.js -s test/input2.igc -d test/output2.fit"
