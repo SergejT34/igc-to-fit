@@ -9,6 +9,8 @@ Garmin-compatible ecosystems.
 A primary motivation for this tool is to enable using IGC files in DJI Studio for showing flight data on videos made
 with the DJI Osmo 360 camera.
 
+[![Sample Video](https://markdown-videos-api.jorgenkh.no/url?url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D9ioaG6pJlLw)](https://www.youtube.com/watch?v=9ioaG6pJlLw)
+
 ## Overview
 
 - Input: IGC (International Gliding Commission) flight log files.
