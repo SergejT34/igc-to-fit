@@ -1,5 +1,7 @@
 # igc-to-fit
 
+![95% Vibe_Coded](https://img.shields.io/badge/95%25-Vibe_Coded-blue?logo=openai&logoColor=white)
+
 Convert IGC paragliding flight logs to Garmin FIT files via a simple Node.js CLI.
 
 This tool parses an `.igc` flight, computes a normalized track using `igc-xc-score`, and encodes a FIT activity with
