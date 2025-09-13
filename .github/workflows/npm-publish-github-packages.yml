@@ -1,6 +1,9 @@
 name: Node.js Package
 
 on:
+    push:
+        branches:
+            - master
     release:
         types: [ created ]
 
@@ -17,6 +20,7 @@ jobs:
                     node-version: 20
                     registry-url: https://npm.pkg.github.com/
                     always-auth: 'true'
+                    scope: 'SergejT34'
             -   run: npm ci
             -   run: npm run run
             -   run: npm publish
