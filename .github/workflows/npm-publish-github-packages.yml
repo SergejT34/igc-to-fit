@@ -20,6 +20,7 @@ jobs:
                     scope: '@SergejT34'
             -   run: npm ci
             -   run: npm run run
+            -   run: npm version ${{ github.ref_name }}
             -   run: npm publish
                 env:
                     NODE_AUTH_TOKEN: ${{secrets.GITHUB_TOKEN}}
