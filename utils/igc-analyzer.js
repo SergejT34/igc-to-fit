@@ -777,4 +777,5 @@ class IGCAnalyzer {
     }
 }
 
-module.exports = IGCAnalyzer;
+// module.exports = IGCAnalyzer;
+export default IGCAnalyzer;

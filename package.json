@@ -3,6 +3,7 @@
     "version": "1.0.0",
     "description": "Convert IGC paragliding files to Garmin FIT format",
     "main": "index.js",
+    "type": "module",
     "repository": {
         "type": "git",
         "url": "https://github.com/SergejT34/igc-to-fit"
@@ -11,7 +12,7 @@
         "igc-to-fit": "index.js"
     },
     "scripts": {
-        "run": "node index.js -h",
+        "run": "node index.js -V",
         "run-test1": "node index.js -s test/input1.igc -d test/output1.fit",
         "run-test2": "node index.js -s test/input2.igc -d test/output2.fit"
     },

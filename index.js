@@ -12,7 +12,7 @@ import IGCAnalyzer from "./utils/igc-analyzer.js";
 console.log(figlet.textSync("IGC 2 FIT"));
 
 program
-    .version("1.0.0")
+    .version(process.env.npm_package_version)
     .description("CLI for converting igc file to fit")
     .option("-s, --src <value>", "Source *.igc file")
     .option("-d, --dst <value>", "Destination *.fit file")
