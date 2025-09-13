@@ -16,6 +16,8 @@ jobs:
                 with:
                     node-version: 20
                     registry-url: https://npm.pkg.github.com/
+                    always-auth: 'true'
+                    scope: '@sergej'
             -   run: npm ci
             -   run: npm run run
             -   run: npm publish
