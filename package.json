@@ -1,6 +1,6 @@
 {
     "name": "@SergejT34/igc-to-fit",
-    "version": "1.0.2",
+    "version": "1.0.0",
     "description": "Convert IGC paragliding files to Garmin FIT format",
     "main": "index.js",
     "repository": {
